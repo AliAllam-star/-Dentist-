@@ -325,15 +325,23 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-// يمكنك إضافة هذا الكود في ملف الصفحة الرئيسية أو ملف layout
-if (typeof window !== 'undefined') {
-  // منع الزر الأيمن
-  document.addEventListener('contextmenu', (e) => e.preventDefault());
+// 1. منع استخدام الزر الأيمن للفأرة (Right Click)
+document.addEventListener('contextmenu', function(e) {
+  e.preventDefault();
+});
 
-  // منع اختصارات Ctrl+U و F12
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'F12' || (e.ctrlKey && (e.key === 'u' || e.key === 'U'))) {
-      e.preventDefault();
-    }
-  });
-}
+// 2. منع اختصارات لوحة المفاتيح
+document.addEventListener('keydown', function(e) {
+  // منع F12 (أدوات المطور)
+  // منع Ctrl+U (عرض سورس الصفحة)
+  // منع Ctrl+Shift+I (فتح Inspect)
+  // منع Ctrl+Shift+J (فتح Console)
+  if (
+    e.key === 'F12' ||
+    (e.ctrlKey && e.key.toLowerCase() === 'u') ||
+    (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'i') ||
+    (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'j')
+  ) {
+    e.preventDefault();
+  }
+});
