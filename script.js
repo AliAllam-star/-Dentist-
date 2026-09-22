@@ -323,3 +323,17 @@ document.addEventListener("DOMContentLoaded", () => {
   modalClose.addEventListener("click", closeModal);
   modalOverlay.addEventListener("click", closeModal);
 });
+
+
+// يمكنك إضافة هذا الكود في ملف الصفحة الرئيسية أو ملف layout
+if (typeof window !== 'undefined') {
+  // منع الزر الأيمن
+  document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+  // منع اختصارات Ctrl+U و F12
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'F12' || (e.ctrlKey && (e.key === 'u' || e.key === 'U'))) {
+      e.preventDefault();
+    }
+  });
+}
