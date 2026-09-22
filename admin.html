@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <title>لوحة تحكم العيادة الشاملة</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+      body {
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        padding: 20px;
+        background: #f4f4f9;
+        direction: rtl;
+      }
+      .container {
+        max-width: 700px;
+        margin: auto;
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      }
+      h2 {
+        color: #0d9488;
+        border-bottom: 2px solid #e5e7eb;
+        padding-bottom: 10px;
+        margin-top: 0;
+      }
+      h3 {
+        color: #374151;
+        margin-top: 25px;
+      }
+      .section {
+        background: #fafafa;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #eee;
+        margin-bottom: 20px;
+      }
+      .field-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #4b5563;
+      }
+      input[type="text"],
+      textarea,
+      input[type="file"] {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        box-sizing: border-box;
+        font-family: inherit;
+        background: white;
+      }
+      textarea {
+        height: 80px;
+        resize: vertical;
+      }
+      .service-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        background: white;
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #e5e7eb;
+      }
+      .service-item input {
+        width: 120px;
+        margin-left: 10px;
+      }
+      button {
+        background: #0d9488;
+        color: white;
+        border: none;
+        padding: 9px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+      button:hover {
+        background: #0f766e;
+      }
+      .btn-init {
+        background: #d97706;
+        margin-bottom: 15px;
+        width: 100%;
+        padding: 10px;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+      .btn-init:hover {
+        background: #b45309;
+      }
+      .img-preview {
+        max-width: 150px;
+        border-radius: 8px;
+        margin-top: 10px;
+        border: 1px solid #ddd;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>لوحة تحكم العيادة 🩺</h2>
+
+      <!-- 1. قسم تعديل النصوص -->
+      <div class="section">
+        <h3>1. تعديل نصوص الموقع الرئيسية 📝</h3>
+        <button class="btn-init" onclick="createInitialTexts()">
+          إيجاد/إنشاء الحقول الافتراضية لأول مرة ⚡
+        </button>
+
+        <div id="settings-fields">جاري فحص النصوص...</div>
+      </div>
+
+      <!-- 2. قسم تعديل صور العيادة -->
+      <div class="section">
+        <h3>2. تعديل صورة العيادة/الدكتور 📸</h3>
+        <div class="field-group">
+          <label>اختر صورة جديدة لتغيير الصورة الرئيسية:</label>
+          <input type="file" id="doctor-image-file" accept="image/*" />
+          <button onclick="uploadImage()" style="margin-top: 10px">
+            رفع وتغيير الصورة 📤
+          </button>
+        </div>
+        <div id="image-status"></div>
+      </div>
+
+      <!-- 3. قسم تعديل الأسعار -->
+      <div class="section">
+        <h3>3. تعديل أسعار الخدمات 💰</h3>
+        <div id="services-list">جاري تحميل الخدمات...</div>
+      </div>
+    </div>
+
+    <script>
+      const SUPABASE_URL = "https://ajkwowucubtfhtqqstdg.supabase.co";
+      // ⚠️ استبدل بمفتاح anon الخاص بك هنا
+      const SUPABASE_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFqa3dvd3VjdWJ0Zmh0cXFzdGRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk0OTA5NjAsImV4cCI6MjEwNTA2Njk2MH0.HATAZ4ckVfIrRzFon9QfD8E7OeOxNEH7u-3Zf6JCbDw";
+
+      const { createClient } = supabase;
+      const _supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+      // 1. تحميل النصوص
+      async function loadSettings() {
+        const { data, error } = await _supabase
+          .from("site_settings")
+          .select("*");
+
+        if (error) {
+          console.error("خطأ في جلب النصوص:", error);
+          document.getElementById("settings-fields").innerHTML =
+            "<p style='color:red;'>خطأ في قراءة النصوص من قاعدة البيانات</p>";
+          return;
+        }
+
+        if (!data || data.length === 0) {
+          document.getElementById("settings-fields").innerHTML = `
+          <p style='color:#d97706;'>الجدول فارغ حالياً. اضغط على الزر البرتقالي بالأعلى لإنشاء الحقول الافتراضية تلقائياً.</p>
+        `;
+          return;
+        }
+
+        let html = "";
+        data.forEach((item) => {
+          const fieldName =
+            item.key === "hero_title"
+              ? "العنوان الرئيسي بالموقع (Hero Title)"
+              : item.key === "about_doc"
+                ? "نبذة عن العيادة والدكتور (About Section)"
+                : item.key;
+
+          html += `
+          <div class="field-group">
+            <label>${fieldName}:</label>
+            <textarea id="setting-val-${item.id}">${item.value || ""}</textarea>
+            <button onclick="updateSetting(${item.id})" style="margin-top: 5px;">حفظ النص</button>
+          </div>
+        `;
+        });
+
+        document.getElementById("settings-fields").innerHTML = html;
+      }
+
+      // 2. إنشاء حقول افتراضية
+      async function createInitialTexts() {
+        const { error } = await _supabase.from("site_settings").insert([
+          { key: "hero_title", value: "أفضل رعاية لأسنانك وأسنان عائلتك" },
+          {
+            key: "about_doc",
+            value:
+              "عيادة متخصصة في أحدث تقنيات طب وتجميل الأسنان بخبرة أكثر من 10 سنوات.",
+          },
+        ]);
+
+        if (error) {
+          alert("تنبيه: الحقول موجودة بالفعل أو حدث خطأ: " + error.message);
+        } else {
+          alert("تم إنشاء النصوص الافتراضية بنجاح! 🎉");
+        }
+        loadSettings();
+      }
+
+      // 3. تحديث النص
+      async function updateSetting(id) {
+        const newValue = document.getElementById(`setting-val-${id}`).value;
+        const { error } = await _supabase
+          .from("site_settings")
+          .update({ value: newValue })
+          .eq("id", id);
+
+        if (error) {
+          alert("حدث خطأ أثناء التحديث: " + error.message);
+        } else {
+          alert("تم حفظ النص بنجاح! 🎉");
+        }
+      }
+
+      // 4. رفع وتحديث الصور في Storage
+      async function uploadImage() {
+        const fileInput = document.getElementById("doctor-image-file");
+        const statusDiv = document.getElementById("image-status");
+
+        if (!fileInput.files || fileInput.files.length === 0) {
+          alert("برجاء اختيار صورة أولاً!");
+          return;
+        }
+
+        const file = fileInput.files[0];
+        const fileExt = file.name.split(".").pop();
+        const fileName = `doctor-main-${Date.now()}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        statusDiv.innerHTML = "<p style='color:blue;'>جاري رفع الصورة...</p>";
+
+        // رفع الصورة لـ Storage
+        const { data, error } = await _supabase.storage
+          .from("clinic-images")
+          .upload(filePath, file, { upsert: true });
+
+        if (error) {
+          statusDiv.innerHTML = `<p style='color:red;'>خطأ في رفع الصورة: ${error.message}</p>`;
+          return;
+        }
+
+        // الحصول على الرابط العام للصورة
+        const { data: publicUrlData } = _supabase.storage
+          .from("clinic-images")
+          .getPublicUrl(filePath);
+
+        const imageUrl = publicUrlData.publicUrl;
+
+        // حفظ رابط الصورة في جدول site_settings
+        await _supabase
+          .from("site_settings")
+          .upsert(
+            { key: "hero_image", value: imageUrl },
+            { onConflict: "key" },
+          );
+
+        statusDiv.innerHTML = `
+        <p style='color:green;'>تم رفع وتحديث الصورة بنجاح! 🎉</p>
+        <img src="${imageUrl}" class="img-preview" alt="معاينة الصورة">
+      `;
+      }
+
+      // 5. تحميل الخدمات والأسعار
+      async function loadServices() {
+        const { data, error } = await _supabase.from("services").select("*");
+        if (error) {
+          document.getElementById("services-list").innerHTML =
+            "خطأ في تحميل الخدمات";
+          return;
+        }
+
+        let html = "";
+        data.forEach((item) => {
+          const serviceTitle =
+            item.title || item.name || `خدمة رقم (${item.id})`;
+          html += `
+          <div class="service-item">
+            <span><strong>${serviceTitle}</strong></span>
+            <div>
+              <input type="text" id="price-${item.id}" value="${item.price}">
+              <button onclick="updatePrice(${item.id})">حفظ السعر</button>
+            </div>
+          </div>
+        `;
+        });
+        document.getElementById("services-list").innerHTML = html;
+      }
+
+      // 6. تحديث السعر
+      async function updatePrice(id) {
+        const newPrice = document.getElementById(`price-${id}`).value;
+        const { error } = await _supabase
+          .from("services")
+          .update({ price: newPrice })
+          .eq("id", id);
+
+        if (error) {
+          alert("حدث خطأ أثناء التحديث: " + error.message);
+        } else {
+          alert("تم تحديث السعر بنجاح! 🎉");
+        }
+      }
+
+      loadSettings();
+      loadServices();
+    </script>
+  </body>
+</html>
