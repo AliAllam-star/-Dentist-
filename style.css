@@ -82,6 +82,7 @@ ul { list-style: none; }
 .header__inner { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .8rem 0; }
 
 .logo { display: inline-flex; align-items: center; gap: .55rem; font-family: var(--font-head); }
+.nova-logo {border-radius: 9px; max-width: 2.8rem;}
 .logo__mark {
   width: 42px; height: 42px; display: grid; place-items: center;
   background: var(--teal); color: var(--white); border-radius: 12px;
