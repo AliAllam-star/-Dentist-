@@ -191,7 +191,7 @@
     `📝 *الملاحظات:* ${notes || 'لا يوجد'}`
   ]
       // ضع رقم الواتسآب الخاص بك هنا مع كود الدولة وبدون علامة +
-      var myWhatsAppNumber = "966502466573"; 
+      var myWhatsAppNumber = "201036822308"; 
 
       // 3. تشفير الرسالة وتجهيز الرابط
       var fullMessage = messageLines.join('\n');

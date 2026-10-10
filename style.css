@@ -563,7 +563,7 @@ ul { list-style: none; }
 }
 .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-soft); }
 .form__success { grid-column: 1 / -1; color: var(--teal-dark); background: var(--teal-soft); padding: .8rem; border-radius: var(--radius-sm); text-align: center; font-weight: 700; }
-
+/* textarea .message { max-width: fit-content; min-width: fit-content;} */
 /* ====================== التذييل ====================== */
 .footer { background: var(--navy); color: #b9cdca; }
 .footer__grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1.2fr; gap: 2rem; padding: 3.5rem 0; }
