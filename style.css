@@ -559,8 +559,9 @@ ul { list-style: none; }
 .field label { font-family: var(--font-head); font-weight: 600; color: var(--navy); font-size: .9rem; }
 .field input, .field select, .field textarea {
   font-family: var(--font-body); font-size: 1rem; padding: .75rem .9rem; border: 1.5px solid var(--line);
-  border-radius: var(--radius-sm); background: #fbfefe; color: var(--text); transition: var(--transition); width: 100%;
+  border-radius: var(--radius-sm); background: #fbfefe; color: var(--text); transition: var(--transition); width: 100% ; resize: none;
 }
+.field--full textarea {height: 7rem;}
 .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-soft); }
 .form__success { grid-column: 1 / -1; color: var(--teal-dark); background: var(--teal-soft); padding: .8rem; border-radius: var(--radius-sm); text-align: center; font-weight: 700; }
 /* textarea .message { max-width: fit-content; min-width: fit-content;} */
